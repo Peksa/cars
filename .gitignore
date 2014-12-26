@@ -1,0 +1,9 @@
+tmp/
+eclipse/
+documentation/
+.idea/
+.classpath
+.project
+.settings/
+*.swp
+*.swo
