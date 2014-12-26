@@ -12,9 +12,9 @@ Camera.prototype.getCenter = function() {
   return ret;
 };
 
-function Car() {
-  this.top = 0;
-  this.left = 0;
+function Car(top, left) {
+  this.top = top;
+  this.left = left;
   this.speed = 0;
   this.rotation = 0;
 }
@@ -44,7 +44,7 @@ function Game(canvas) {
   this.canvas = canvas;
   this.context = canvas.getContext("2d");
   this.camera = new Camera(0, 0);
-  this.player = new Car();
+  this.player = new Car(500, 670);
   this.pressedKeys = {};
 }
 
