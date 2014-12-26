@@ -210,7 +210,7 @@ Game.prototype.renderCar = function(car) {
   if (!car) {
     return;
   }
-  this.drawCircleCamera(car.color, 7, car.left, car.top);
+  this.drawImageCamera("img/blood.gif", car.left, car.top);
 };
 
 Game.prototype.renderNetworkCars = function() {
