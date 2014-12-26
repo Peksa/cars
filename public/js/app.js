@@ -91,7 +91,6 @@ Game.prototype.moveCameraTowards = function(left, top) {
 };
 
 Game.prototype.checkPlayerControls = function() {
-  // Acceleration, breaking, decceleration
   if (this.pressedKeys[87]) {
     this.player.changeSpeed(1);
   } else if (this.pressedKeys[83]) {
@@ -100,7 +99,6 @@ Game.prototype.checkPlayerControls = function() {
     this.player.changeSpeed(-0.5);
   }
 
-  // Turn left
   if (this.pressedKeys[65] && !this.pressedKeys[68]) {
     this.player.turn(-1);
   } else if (this.pressedKeys[68] && !this.pressedKeys[65]) {
@@ -132,7 +130,23 @@ Game.prototype.setCamera = function(left, top) {
 };
 
 Game.prototype.renderCar = function(car) {
-  this.drawImageCamera("img/blood.gif", car.left, car.top);
+  this.drawCircleCamera("#ff0000", 7, car.left, car.top);
+};
+
+Game.prototype.drawCircleCamera = function(color, radius, left, top) {
+  var cameraTop = this.camera.top;
+  var cameraLeft = this.camera.left;
+  this.drawCircleRaw(color, radius, left-cameraLeft, top-cameraTop);
+};
+
+Game.prototype.drawCircleRaw = function(color, radius, left, top) {
+  this.context.beginPath();
+  this.context.arc(left, top, radius, 0, 2 * Math.PI, false);
+  this.context.fillStyle = color;
+  this.context.fill();
+  this.context.lineWidth = 1;
+  this.context.strokeStyle = 'black';
+  this.context.stroke();
 };
 
 Game.prototype.drawBackground = function() {
