@@ -62,6 +62,7 @@ Game.prototype.init = function() {
   this.renderLoop();
   this.drawBackground();
   this.setupKeyboardListeners();
+  this.gameLoop();
 };
 
 Game.prototype.setupKeyboardListeners = function() {
@@ -81,12 +82,21 @@ Game.prototype.renderLoop = function() {
   (function renderGame() {
     //self.context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     self.drawBackground();
-    self.checkPlayerControls();
-    self.player.tick();
     self.renderCar(self.player);
     self.moveCameraTowards(self.player.left, self.player.top);
     window.requestAnimationFrame(renderGame);
   }());
+};
+
+Game.prototype.gameLoop = function() {
+  var self = this;
+
+  var tickGame = function() {
+    self.checkPlayerControls();
+    self.player.tick();
+  };
+
+  setInterval(tickGame, 16);
 };
 
 Game.prototype.moveCameraTowards = function(left, top) {
@@ -112,7 +122,6 @@ Game.prototype.checkPlayerControls = function() {
   } else if (this.pressedKeys[68] && !this.pressedKeys[65]) {
     this.player.turn(1);
   }
-
 };
 
 Game.prototype.resizeToFullScreen = function() {
