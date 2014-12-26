@@ -12,11 +12,13 @@ Camera.prototype.getCenter = function() {
   return ret;
 };
 
-function Car(top, left) {
+function Car(top, left, color, id) {
   this.top = top;
   this.left = left;
   this.speed = 0;
   this.rotation = 0;
+  this.color = color;
+  this.id = id;
 }
 
 Car.prototype.tick = function() {
@@ -52,8 +54,10 @@ function Game(canvas) {
   this.canvas = canvas;
   this.context = canvas.getContext("2d");
   this.camera = new Camera(0, 0);
-  this.player = new Car(500, 670);
+  this.player = undefined;
+  this.cars = [];
   this.pressedKeys = {};
+  this.network = new Network();
 }
 
 Game.prototype.init = function() {
@@ -63,6 +67,7 @@ Game.prototype.init = function() {
   this.drawBackground();
   this.setupKeyboardListeners();
   this.gameLoop();
+  this.network.connect();
 };
 
 Game.prototype.setupKeyboardListeners = function() {
@@ -80,23 +85,78 @@ Game.prototype.setupKeyboardListeners = function() {
 Game.prototype.renderLoop = function() {
   var self = this;
   (function renderGame() {
-    //self.context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     self.drawBackground();
     self.renderCar(self.player);
-    self.moveCameraTowards(self.player.left, self.player.top);
+    self.renderNetworkCars();
+    if (self.player) {
+      self.moveCameraTowards(self.player.left, self.player.top);
+    }
     window.requestAnimationFrame(renderGame);
   }());
 };
 
 Game.prototype.gameLoop = function() {
   var self = this;
-
   var tickGame = function() {
-    self.checkPlayerControls();
-    self.player.tick();
+    self.updatePlayer();
+    self.updateNetworkCars();
+    if (self.player) {
+      self.checkPlayerControls();
+      self.tickCar(self.player);
+      self.sendPlayerCar();
+    }
+    self.tickNetworkCars();
   };
-
   setInterval(tickGame, 16);
+};
+
+Game.prototype.updatePlayer = function() {
+  if (!this.network.player) {
+    return;
+  }
+  var car = this.player;
+  if (!car) {
+    car = new Car();
+  }
+  this.updateCar(car, this.network.player);
+  this.player = car;
+};
+
+Game.prototype.updateNetworkCars = function() {
+  if (!this.network.cars || this.network.cars.length == 0) {
+    return;
+  }
+  var newCars = [];
+  for (var i in this.network.cars) {
+    var car = new Car();
+    this.updateCar(car, this.network.cars[i]);
+    newCars.push(car);
+  }
+
+  this.cars = newCars;
+};
+
+Game.prototype.updateCar = function(oldCar, newCar) {
+  oldCar.left = newCar.left;
+  oldCar.top = newCar.top;
+  oldCar.rotation = newCar.rotation;
+  oldCar.speed = newCar.speed;
+  oldCar.id = newCar.id;
+  oldCar.color = newCar.color;
+};
+
+Game.prototype.sendPlayerCar = function() {
+  this.network.send(this.player);
+};
+
+Game.prototype.tickCar = function(car) {
+  car.tick();
+};
+
+Game.prototype.tickNetworkCars = function() {
+  for (var i in this.cars) {
+    this.tickCar(this.cars[i]);
+  }
 };
 
 Game.prototype.moveCameraTowards = function(left, top) {
@@ -136,7 +196,7 @@ Game.prototype.centerCameraAround = function(left, top) {
 };
 
 Game.prototype.setCamera = function(left, top) {
-  var maxTop = 1200 - window.innerHeight
+  var maxTop = 1200 - window.innerHeight;
   var maxLeft = 1600 - window.innerWidth;
   var newTop = (top > 0 && top > maxTop) ? maxTop : top;
   var newLeft = (left > 0 && left > maxLeft) ? maxLeft : left;
@@ -147,7 +207,17 @@ Game.prototype.setCamera = function(left, top) {
 };
 
 Game.prototype.renderCar = function(car) {
-  this.drawCircleCamera("#ff0000", 7, car.left, car.top);
+  if (!car) {
+    return;
+  }
+  this.drawCircleCamera(car.color, 7, car.left, car.top);
+};
+
+Game.prototype.renderNetworkCars = function() {
+  for (var i in this.cars) {
+    var car = this.cars[i];
+    this.renderCar(car);
+  }
 };
 
 Game.prototype.drawCircleCamera = function(color, radius, left, top) {
@@ -187,3 +257,34 @@ Game.prototype.drawImageRaw = function(url, left, top) {
   };
   img.src = url;
 };
+
+function Network() {
+  this.socket = undefined;
+  this.lastTick = undefined;
+  this.player = undefined;
+}
+
+Network.prototype.connect = function() {
+  this.socket = new WebSocket("ws://192.168.1.73:9000/api/socket");
+  this.socket.onmessage = this.messageHandler.bind(this);
+};
+
+Network.prototype.messageHandler = function(event) {
+  var data = JSON.parse(event.data);
+  switch(data.type) {
+    case "tick":
+      this.lastTick = data;
+      this.cars = data.cars;
+      this.player = data.player;
+      break;
+
+    case "join":
+      this.player = data.player;
+      break;
+  }
+};
+
+Network.prototype.send = function(obj) {
+  this.socket.send(JSON.stringify(obj));
+};
+
