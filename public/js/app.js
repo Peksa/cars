@@ -117,9 +117,9 @@ Game.prototype.updatePlayer = function() {
   var car = this.player;
   if (!car) {
     car = new Car();
+    this.updateCar(car, this.network.player);
+    this.player = car;
   }
-  this.updateCar(car, this.network.player);
-  this.player = car;
 };
 
 Game.prototype.updateNetworkCars = function() {
@@ -265,7 +265,7 @@ function Network() {
 }
 
 Network.prototype.connect = function() {
-  this.socket = new WebSocket("ws://192.168.1.73:9000/api/socket");
+  this.socket = new WebSocket("ws://" + window.location.hostname + ":9009/api/socket");
   this.socket.onmessage = this.messageHandler.bind(this);
 };
 
