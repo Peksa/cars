@@ -28,8 +28,16 @@ Car.prototype.tick = function() {
 };
 
 Car.prototype.changeSpeed = function(factor) {
-  var newSpeed = this.speed += 0.2*factor;
-  if (newSpeed > 3) newSpeed = 3;
+
+  var speed = (this.speed == 0) ? 0.7 : Math.max(0.7, 3.5-this.speed);
+  if (factor < 0) {
+    speed = -1;
+  }
+
+  var acc = 0.1*factor*Math.abs(speed);
+
+  var newSpeed = this.speed += acc;
+  if (newSpeed > 3.5) newSpeed = 3.5;
   if (newSpeed < 0) newSpeed = 0;
 
   this.speed = newSpeed;
@@ -94,9 +102,9 @@ Game.prototype.checkPlayerControls = function() {
   if (this.pressedKeys[87]) {
     this.player.changeSpeed(1);
   } else if (this.pressedKeys[83]) {
-    this.player.changeSpeed(-1);
+    this.player.changeSpeed(-2);
   } else {
-    this.player.changeSpeed(-0.5);
+    this.player.changeSpeed(-0.8);
   }
 
   if (this.pressedKeys[65] && !this.pressedKeys[68]) {
