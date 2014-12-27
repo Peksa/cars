@@ -62,7 +62,7 @@ public class API extends WebSocketController {
 
             Either<WebSocketEvent, Tick> e = await(Promise.waitEither(inbound.nextEvent(), stream.nextEvent()));
 
-            // Got event from my client, send this to other clients
+            // Got event from my client, update global game state
             for (String movement : TextFrame.match(e._1)) {
                 Car c = gson.fromJson(movement, Car.class);
                 c.id = id;
@@ -70,7 +70,7 @@ public class API extends WebSocketController {
                 game.updateCar(id, c);
             }
 
-            // Got tick! Send to client
+            // Got tick! Send current state to client
             for (Tick tick : ClassOf(Tick.class).match(e._2)) {
             	Message msg = generateTickmessage(id, tick);
             	if (tick.id % 120 == 0) {

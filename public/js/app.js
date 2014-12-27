@@ -211,7 +211,18 @@ Game.prototype.renderCar = function(car) {
   if (!car) {
     return;
   }
-  this.drawImageCamera("img/car1.png", car.left, car.top);
+  var self = this;
+  var img = new Image();
+  img.onload = function() {
+    self.context.save();
+    self.context.translate(car.left-self.camera.left, car.top-self.camera.top);
+    self.context.rotate(car.rotation);
+    self.context.translate(-25/2,-15/2);
+    self.context.drawImage(img,0,0);
+    self.context.restore();
+  };
+  img.src = "img/car1.png";
+
 };
 
 Game.prototype.renderNetworkCars = function() {
