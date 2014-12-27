@@ -55,7 +55,7 @@ function Game(canvas) {
   this.context = canvas.getContext("2d");
   this.camera = new Camera(0, 0);
   this.player = undefined;
-  this.cars = [];
+  this.cars = {};
   this.pressedKeys = {};
   this.network = new Network();
 }
@@ -126,14 +126,15 @@ Game.prototype.updateNetworkCars = function() {
   if (!this.network.cars || this.network.cars.length == 0) {
     return;
   }
-  var newCars = [];
   for (var i in this.network.cars) {
-    var car = new Car();
-    this.updateCar(car, this.network.cars[i]);
-    newCars.push(car);
+    var networkCar = this.network.cars[i];
+    var car = this.cars[networkCar.id];
+    if (!car) {
+      car = new Car();
+      this.cars[networkCar.id] = car;
+    }
+    this.updateCar(car, networkCar);
   }
-
-  this.cars = newCars;
 };
 
 Game.prototype.updateCar = function(oldCar, newCar) {
