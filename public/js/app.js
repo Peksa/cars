@@ -85,12 +85,12 @@ Game.prototype.setupKeyboardListeners = function() {
 Game.prototype.renderLoop = function() {
   var self = this;
   (function renderGame() {
-    self.drawBackground();
-    self.renderCar(self.player);
-    self.renderNetworkCars();
     if (self.player) {
       self.moveCameraTowards(self.player.left, self.player.top);
     }
+    self.drawBackground();
+    self.renderCar(self.player);
+    self.renderNetworkCars();
     window.requestAnimationFrame(renderGame);
   }());
 };
@@ -217,7 +217,7 @@ Game.prototype.renderCar = function(car) {
     self.context.save();
     self.context.translate(car.left-self.camera.left, car.top-self.camera.top);
     self.context.rotate(car.rotation);
-    self.context.translate(-25/2,-15/2);
+    self.context.translate(-24/2,-14/2);
     self.context.drawImage(img,0,0);
     self.context.restore();
   };
