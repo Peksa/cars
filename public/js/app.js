@@ -91,9 +91,17 @@ Game.prototype.renderLoop = function() {
     self.drawBackground();
     self.renderCar(self.player);
     self.renderNetworkCars();
+    self.drawTunnels();
     window.requestAnimationFrame(renderGame);
   }());
 };
+
+counter = 0;
+
+setInterval(function() {
+  console.log("Ticks in the last second: " + counter);
+  counter = 0;
+}, 1000);
 
 Game.prototype.gameLoop = function() {
   var self = this;
@@ -106,6 +114,7 @@ Game.prototype.gameLoop = function() {
       self.sendPlayerCar();
     }
     self.tickNetworkCars();
+    counter++;
   };
   setInterval(tickGame, 16);
 };
@@ -249,10 +258,17 @@ Game.prototype.drawCircleRaw = function(color, radius, left, top) {
 };
 
 Game.prototype.drawBackground = function() {
-  this.drawImageCamera("img/bg.jpg", 0, -0);
+  this.drawImageCamera("img/bg.jpg", 0, 0);
   this.drawImageCamera("img/bg2.jpg", 0, 600);
   this.drawImageCamera("img/bg3.jpg", 800, 0);
   this.drawImageCamera("img/bg4.jpg", 800, 600);
+};
+
+Game.prototype.drawTunnels = function() {
+  this.drawImageCamera("img/tunnel1.gif", 271, 439);
+  this.drawImageCamera("img/tunnel2.gif", 271, 646);
+  this.drawImageCamera("img/tunnel3.gif", 1160, 439);
+  this.drawImageCamera("img/tunnel4.gif", 1160, 646);
 };
 
 Game.prototype.drawImageCamera = function(url, left, top) {
