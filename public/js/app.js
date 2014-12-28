@@ -92,6 +92,7 @@ Game.prototype.renderLoop = function() {
     self.renderCar(self.player);
     self.renderNetworkCars();
     self.drawTunnels();
+    self.drawBoundingBoxes();
     window.requestAnimationFrame(renderGame);
   }());
 };
@@ -161,6 +162,8 @@ Game.prototype.sendPlayerCar = function() {
 
 Game.prototype.tickCar = function(car) {
   car.tick();
+
+
 };
 
 Game.prototype.tickNetworkCars = function() {
@@ -226,7 +229,7 @@ Game.prototype.renderCar = function(car) {
     self.context.save();
     self.context.translate(car.left-self.camera.left, car.top-self.camera.top);
     self.context.rotate(car.rotation);
-    self.context.translate(-24/2,-14/2);
+    self.context.translate(-25/2,-15/2);
     self.context.drawImage(img,0,0);
     self.context.restore();
   };
@@ -269,6 +272,49 @@ Game.prototype.drawTunnels = function() {
   this.drawImageCamera("img/tunnel2.gif", 271, 646);
   this.drawImageCamera("img/tunnel3.gif", 1160, 439);
   this.drawImageCamera("img/tunnel4.gif", 1160, 646);
+};
+
+Game.prototype.drawBoundingBoxes = function() {
+  this.drawRectangleCamera(200, 100, 25, 200);
+  this.drawCircleCamera("#0f0", 3, 100, 200);
+  this.drawCircleCamera("#0f0", 3, 100, 400);
+  this.drawCircleCamera("#0f0", 3, 125, 200);
+  this.drawCircleCamera("#0f0", 3, 125, 400);
+
+
+  if (this.player) {
+    var y = this.player.top;
+    var x = this.player.left;
+    var r = this.player.rotation;
+
+    var ry = y+5*Math.sin(r+Math.PI/2);
+    var rx = x+5*Math.cos(r+Math.PI/2);
+
+    var ly = y+5*Math.sin(r-Math.PI/2);
+    var lx = x+5*Math.cos(r-Math.PI/2);
+
+    var sin = Math.sin(r);
+    var cos = Math.cos(r);
+
+    this.drawCircleCamera("#0f0", 3, lx+10*cos, ly+10*sin);
+    this.drawCircleCamera("#0f0", 3, lx-9*cos, ly-9*sin);
+
+    this.drawCircleCamera("#0f0", 3, rx+10*cos, ry+10*sin);
+    this.drawCircleCamera("#0f0", 3, rx-9*cos, ry-9*sin);
+
+
+
+  }
+
+};
+
+Game.prototype.drawRectangleCamera = function(top, left, width, height) {
+  var cameraTop = this.camera.top;
+  var cameraLeft = this.camera.left;
+  this.context.beginPath();
+  this.context.rect(left-cameraLeft, top-cameraTop, width, height);
+  this.context.fillStyle = 'yellow';
+  this.context.fill();
 };
 
 Game.prototype.drawImageCamera = function(url, left, top) {
