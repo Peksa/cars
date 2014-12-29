@@ -100,8 +100,7 @@ function Game(canvas) {
   this.pressedKeys = {};
   this.network = new Network();
   this.boundingBoxes = [
-    [300, 500, 25, 20],
-    [100, 100, 105, 200]
+    [91, 88, 31, 161]
   ];
 }
 
@@ -145,9 +144,15 @@ Game.prototype.renderLoop = function() {
 };
 
 Game.prototype.drawBoundingBoxes = function() {
+  var w = 1600;
+  var h = 1200;
+
   for (var i = 0; i < this.boundingBoxes.length; i++) {
     var box = this.boundingBoxes[i];
     this.drawRectangleCamera("yellow", box[0], box[1], box[2], box[3]);
+    this.drawRectangleCamera("yellow", box[0], h-box[3]-box[1], box[2], box[3]);
+    this.drawRectangleCamera("yellow", w-box[2]-box[0], box[1], box[2], box[3]);
+    this.drawRectangleCamera("yellow", w-box[2]-box[0], h-box[3]-box[1], box[2], box[3]);
   }
 };
 
