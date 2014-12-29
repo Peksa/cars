@@ -22,6 +22,8 @@ function Car(top, left, color, id) {
 }
 
 Car.prototype.tick = function() {
+  this.rotation = (Math.PI*2 + this.rotation) % (Math.PI*2);
+
   var dtop = this.speed*Math.sin(this.rotation);
   var dleft = this.speed*Math.cos(this.rotation);
 
@@ -29,24 +31,63 @@ Car.prototype.tick = function() {
   this.left += dleft;
 };
 
-Car.prototype.changeSpeed = function(factor) {
+Car.prototype.untick = function() {
+  var dtop = this.speed*Math.sin(this.rotation);
+  var dleft = this.speed*Math.cos(this.rotation);
 
-  var speed = (this.speed == 0) ? 0.7 : Math.max(0.7, 3.5-this.speed);
-  if (factor < 0) {
-    speed = -1;
+  this.top -= dtop;
+  this.left -= dleft;
+};
+
+
+Car.prototype.accelerate = function() {
+
+  // If going backwards, brake instead.
+  if (this.speed < 0) {
+    this.speed += 0.2;
+    return;
   }
 
-  var acc = 0.1*factor*Math.abs(speed);
+  // AccelerationSpeed (how quickly the car accelerates)
+  // depends on current speed. (Base 0.7, then slower and slower the
+  // closer to max speed you are.
+  var accelerationSpeed = (this.speed == 0) ? 0.7 : Math.max(0.7, 3.5-this.speed);
 
+  var acc = Math.abs(0.2*accelerationSpeed);
   var newSpeed = this.speed += acc;
+
+  // Capped speed
   if (newSpeed > 3.5) newSpeed = 3.5;
-  if (newSpeed < 0) newSpeed = 0;
 
   this.speed = newSpeed;
 };
 
+Car.prototype.brakeOrReverse = function() {
+  this.speed -= 0.4;
+  if (this.speed < -2) {
+    this.speed = -2;
+  }
+};
+
+Car.prototype.idle = function() {
+  if (this.speed > 0) {
+    this.speed -= 0.12;
+    if (this.speed < 0) {
+      this.speed = 0;
+    }
+  } else if (this.speed < 0) {
+    this.speed += 0.12;
+    if (this.speed > 0) {
+      this.speed = 0;
+    }
+  }
+};
+
 Car.prototype.turn = function(direction) {
-  this.rotation += 0.1*direction;
+  if (this.speed == 0) {
+    return;
+  }
+  this.rotation += 0.11*direction*(this.speed/3.5);
 };
 
 
@@ -58,6 +99,10 @@ function Game(canvas) {
   this.cars = {};
   this.pressedKeys = {};
   this.network = new Network();
+  this.boundingBoxes = [
+    [300, 500, 25, 20],
+    [100, 100, 105, 200]
+  ];
 }
 
 Game.prototype.init = function() {
@@ -93,16 +138,23 @@ Game.prototype.renderLoop = function() {
     self.renderNetworkCars();
     self.drawTunnels();
 
-    self.isColliding(200, 100, 25, 200);
+    self.drawBoundingBoxes();
 
     window.requestAnimationFrame(renderGame);
   }());
 };
 
+Game.prototype.drawBoundingBoxes = function() {
+  for (var i = 0; i < this.boundingBoxes.length; i++) {
+    var box = this.boundingBoxes[i];
+    this.drawRectangleCamera("yellow", box[0], box[1], box[2], box[3]);
+  }
+};
+
 counter = 0;
 
 setInterval(function() {
-  console.log("Ticks in the last second: " + counter);
+  //.log("Ticks in the last second: " + counter);
   counter = 0;
 }, 1000);
 
@@ -163,13 +215,14 @@ Game.prototype.sendPlayerCar = function() {
 };
 
 
-Game.prototype.isColliding = function(boxLeft, boxTop, boxWidth, boxHeight) {
-
-  var colliding = true;
+Game.prototype.isCollidingWith = function(boxLeft, boxTop, boxWidth, boxHeight) {
   if (this.player) {
     var y = this.player.top;
     var x = this.player.left;
     var r = this.player.rotation;
+
+    // TODO: do something smart with radius around car and bounds checking
+    // TODO: before doing "expensive" trigonometry.
 
     var ry = y+5*Math.sin(r+Math.PI/2);
     var rx = x+5*Math.cos(r+Math.PI/2);
@@ -189,38 +242,57 @@ Game.prototype.isColliding = function(boxLeft, boxTop, boxWidth, boxHeight) {
     var dx = rx-9*cos;
     var dy = ry-9*sin;
 
-    this.drawCircleCamera("#0f0", 3, ax, ay);
-    this.drawCircleCamera("#0f0", 3, bx, by);
-    this.drawCircleCamera("#0f0", 3, cx, cy);
-    this.drawCircleCamera("#0f0", 3, dx, dy);
-
     var minx = Math.min(ax, bx, cx, dx);
     var miny = Math.min(ay, by, cy, dy);
 
     var maxx = Math.max(ax, bx, cx, dx);
     var maxy = Math.max(ay, by, cy, dy);
 
-
     if (boxLeft > maxx) {
-      colliding = false;
+      return false;
     } else if (boxLeft+boxWidth < minx) {
-      colliding = false;
+      return false;
     } else if (boxTop > maxy) {
-      colliding = false;
+      return false;
     } else if (boxTop+boxHeight < miny) {
-      colliding = false;
+      return false;
     }
+    return true;
+
   }
-  var color = colliding ? "#f00" : "#ff0";
-  this.drawRectangleCamera(color, boxLeft, boxTop, boxWidth, boxHeight);
-  this.drawCircleCamera("#0f0", 3, boxLeft, boxTop);
-  this.drawCircleCamera("#0f0", 3, boxLeft, boxTop+boxHeight);
-  this.drawCircleCamera("#0f0", 3, boxLeft+boxWidth, boxTop);
-  this.drawCircleCamera("#0f0", 3, boxLeft+boxWidth, boxTop+boxHeight);
+  return false;
 };
 
 Game.prototype.tickCar = function(car) {
   car.tick();
+
+  for (var i = 0; i < this.boundingBoxes.length; i++) {
+    var box = this.boundingBoxes[i];
+    if (this.isCollidingWith(box[0], box[1], box[2], box[3])) {
+
+      car.untick();
+
+      var quarter = (Math.PI*2 + car.rotation) % (Math.PI/2);
+      if (quarter < Math.PI/4) {
+        car.rotation -= quarter;
+      } else {
+        car.rotation += Math.PI/2-quarter;
+      }
+      car.rotation = (Math.PI*2 + car.rotation) % (Math.PI*2);
+
+      car.tick();
+      if (this.isCollidingWith(box[0], box[1], box[2], box[3])) {
+        car.untick();
+
+        car.speed = -car.speed;
+      } else {
+        car.speed -= 2;
+        if (car.speed < 0) {
+          car.speed = 0;
+        }
+      }
+    }
+  }
 };
 
 Game.prototype.tickNetworkCars = function() {
@@ -240,11 +312,11 @@ Game.prototype.moveCameraTowards = function(left, top) {
 
 Game.prototype.checkPlayerControls = function() {
   if (this.pressedKeys[87]) {
-    this.player.changeSpeed(1);
+    this.player.accelerate()
   } else if (this.pressedKeys[83]) {
-    this.player.changeSpeed(-2);
+    this.player.brakeOrReverse();
   } else {
-    this.player.changeSpeed(-0.8);
+    this.player.idle();
   }
 
   if (this.pressedKeys[65] && !this.pressedKeys[68]) {
