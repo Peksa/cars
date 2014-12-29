@@ -165,7 +165,7 @@ Game.prototype.sendPlayerCar = function() {
 
 Game.prototype.isColliding = function(boxLeft, boxTop, boxWidth, boxHeight) {
 
-  var colliding = false;
+  var colliding = true;
   if (this.player) {
     var y = this.player.top;
     var x = this.player.left;
@@ -194,6 +194,22 @@ Game.prototype.isColliding = function(boxLeft, boxTop, boxWidth, boxHeight) {
     this.drawCircleCamera("#0f0", 3, cx, cy);
     this.drawCircleCamera("#0f0", 3, dx, dy);
 
+    var minx = Math.min(ax, bx, cx, dx);
+    var miny = Math.min(ay, by, cy, dy);
+
+    var maxx = Math.max(ax, bx, cx, dx);
+    var maxy = Math.max(ay, by, cy, dy);
+
+
+    if (boxLeft > maxx) {
+      colliding = false;
+    } else if (boxLeft+boxWidth < minx) {
+      colliding = false;
+    } else if (boxTop > maxy) {
+      colliding = false;
+    } else if (boxTop+boxHeight < miny) {
+      colliding = false;
+    }
   }
   var color = colliding ? "#f00" : "#ff0";
   this.drawRectangleCamera(color, boxLeft, boxTop, boxWidth, boxHeight);
