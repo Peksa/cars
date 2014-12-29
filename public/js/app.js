@@ -92,7 +92,9 @@ Game.prototype.renderLoop = function() {
     self.renderCar(self.player);
     self.renderNetworkCars();
     self.drawTunnels();
-    self.drawBoundingBoxes();
+
+    self.isColliding(200, 100, 25, 200);
+
     window.requestAnimationFrame(renderGame);
   }());
 };
@@ -160,10 +162,49 @@ Game.prototype.sendPlayerCar = function() {
   this.network.send(this.player);
 };
 
+
+Game.prototype.isColliding = function(boxLeft, boxTop, boxWidth, boxHeight) {
+
+  var colliding = false;
+  if (this.player) {
+    var y = this.player.top;
+    var x = this.player.left;
+    var r = this.player.rotation;
+
+    var ry = y+5*Math.sin(r+Math.PI/2);
+    var rx = x+5*Math.cos(r+Math.PI/2);
+
+    var ly = y+5*Math.sin(r-Math.PI/2);
+    var lx = x+5*Math.cos(r-Math.PI/2);
+
+    var sin = Math.sin(r);
+    var cos = Math.cos(r);
+
+    var ax = lx+10*cos;
+    var ay = ly+10*sin;
+    var bx = lx-9*cos;
+    var by = ly-9*sin;
+    var cx = rx+10*cos;
+    var cy = ry+10*sin;
+    var dx = rx-9*cos;
+    var dy = ry-9*sin;
+
+    this.drawCircleCamera("#0f0", 3, ax, ay);
+    this.drawCircleCamera("#0f0", 3, bx, by);
+    this.drawCircleCamera("#0f0", 3, cx, cy);
+    this.drawCircleCamera("#0f0", 3, dx, dy);
+
+  }
+  var color = colliding ? "#f00" : "#ff0";
+  this.drawRectangleCamera(color, boxLeft, boxTop, boxWidth, boxHeight);
+  this.drawCircleCamera("#0f0", 3, boxLeft, boxTop);
+  this.drawCircleCamera("#0f0", 3, boxLeft, boxTop+boxHeight);
+  this.drawCircleCamera("#0f0", 3, boxLeft+boxWidth, boxTop);
+  this.drawCircleCamera("#0f0", 3, boxLeft+boxWidth, boxTop+boxHeight);
+};
+
 Game.prototype.tickCar = function(car) {
   car.tick();
-
-
 };
 
 Game.prototype.tickNetworkCars = function() {
@@ -234,7 +275,6 @@ Game.prototype.renderCar = function(car) {
     self.context.restore();
   };
   img.src = "img/car1.png";
-
 };
 
 Game.prototype.renderNetworkCars = function() {
@@ -274,46 +314,12 @@ Game.prototype.drawTunnels = function() {
   this.drawImageCamera("img/tunnel4.gif", 1160, 646);
 };
 
-Game.prototype.drawBoundingBoxes = function() {
-  this.drawRectangleCamera(200, 100, 25, 200);
-  this.drawCircleCamera("#0f0", 3, 100, 200);
-  this.drawCircleCamera("#0f0", 3, 100, 400);
-  this.drawCircleCamera("#0f0", 3, 125, 200);
-  this.drawCircleCamera("#0f0", 3, 125, 400);
-
-
-  if (this.player) {
-    var y = this.player.top;
-    var x = this.player.left;
-    var r = this.player.rotation;
-
-    var ry = y+5*Math.sin(r+Math.PI/2);
-    var rx = x+5*Math.cos(r+Math.PI/2);
-
-    var ly = y+5*Math.sin(r-Math.PI/2);
-    var lx = x+5*Math.cos(r-Math.PI/2);
-
-    var sin = Math.sin(r);
-    var cos = Math.cos(r);
-
-    this.drawCircleCamera("#0f0", 3, lx+10*cos, ly+10*sin);
-    this.drawCircleCamera("#0f0", 3, lx-9*cos, ly-9*sin);
-
-    this.drawCircleCamera("#0f0", 3, rx+10*cos, ry+10*sin);
-    this.drawCircleCamera("#0f0", 3, rx-9*cos, ry-9*sin);
-
-
-
-  }
-
-};
-
-Game.prototype.drawRectangleCamera = function(top, left, width, height) {
+Game.prototype.drawRectangleCamera = function(color, left, top, width, height) {
   var cameraTop = this.camera.top;
   var cameraLeft = this.camera.left;
   this.context.beginPath();
   this.context.rect(left-cameraLeft, top-cameraTop, width, height);
-  this.context.fillStyle = 'yellow';
+  this.context.fillStyle = color;
   this.context.fill();
 };
 
