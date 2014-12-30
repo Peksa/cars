@@ -398,7 +398,7 @@ Game.prototype.renderCar = function(car) {
     return;
   }
   var self = this;
-  this.getImage("img/car1.png", function(img) {
+  this.getImage("car1.png", function(img) {
     self.context.save();
     self.context.translate(car.left - self.camera.left, car.top - self.camera.top);
     self.context.rotate(car.rotation);
@@ -432,17 +432,17 @@ Game.prototype.drawCircleRaw = function(color, radius, left, top) {
 };
 
 Game.prototype.drawBackground = function() {
-  this.drawImageCamera("img/bg.jpg", 0, 0);
-  this.drawImageCamera("img/bg2.jpg", 0, 600);
-  this.drawImageCamera("img/bg3.jpg", 800, 0);
-  this.drawImageCamera("img/bg4.jpg", 800, 600);
+  this.drawImageCamera("bg.jpg", 0, 0);
+  this.drawImageCamera("bg2.jpg", 0, 600);
+  this.drawImageCamera("bg3.jpg", 800, 0);
+  this.drawImageCamera("bg4.jpg", 800, 600);
 };
 
 Game.prototype.drawTunnels = function() {
-  this.drawImageCamera("img/tunnel1.gif", 271, 439);
-  this.drawImageCamera("img/tunnel2.gif", 271, 646);
-  this.drawImageCamera("img/tunnel3.gif", 1160, 439);
-  this.drawImageCamera("img/tunnel4.gif", 1160, 646);
+  this.drawImageCamera("tunnel1.gif", 271, 439);
+  this.drawImageCamera("tunnel2.gif", 271, 646);
+  this.drawImageCamera("tunnel3.gif", 1160, 439);
+  this.drawImageCamera("tunnel4.gif", 1160, 646);
 };
 
 Game.prototype.drawRectangleCamera = function(color, left, top, width, height) {
@@ -473,7 +473,7 @@ Game.prototype.getImage = function(url, callback) {
     self.imageCache[url] = img;
     callback(img);
   };
-  img.src = url;
+  img.src = "./static/img/" + url;
 };
 
 Game.prototype.drawImageRaw = function(url, left, top) {
@@ -490,7 +490,12 @@ function Network() {
 }
 
 Network.prototype.connect = function() {
-  this.socket = new WebSocket("ws://" + window.location.hostname + ":9009/api/socket");
+  var port = (location.port ? ":" + location.port : "");
+  var path = location.pathname;
+  path = (path[path.length-1] == "/") ? path : path + "/";
+  var url  = "ws://" + window.location.hostname + port + path + "api/socket";
+  console.log("Connecting to: " + url);
+  this.socket = new WebSocket(url);
   this.socket.onmessage = this.messageHandler.bind(this);
 };
 
