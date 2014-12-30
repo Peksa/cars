@@ -52,13 +52,13 @@ Car.prototype.accelerate = function() {
   // AccelerationSpeed (how quickly the car accelerates)
   // depends on current speed. (Base 0.7, then slower and slower the
   // closer to max speed you are.
-  var accelerationSpeed = (this.speed == 0) ? 0.7 : Math.max(0.7, 3.5-this.speed);
+  var accelerationSpeed = (this.speed == 0) ? 0.7 : Math.max(0.7, 3-this.speed);
 
   var acc = Math.abs(0.2*accelerationSpeed);
   var newSpeed = this.speed += acc;
 
   // Capped speed
-  if (newSpeed > 3.5) newSpeed = 3.5;
+  if (newSpeed > 3) newSpeed = 3;
 
   this.speed = newSpeed;
 };
