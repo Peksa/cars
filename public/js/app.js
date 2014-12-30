@@ -99,6 +99,7 @@ function Game(canvas) {
   this.cars = {};
   this.pressedKeys = {};
   this.network = new Network();
+  this.imageCache = {};
   this.boundingBoxes = [
     [-200, -200, 2000, 200],
     [-200, 1200, 2000, 200],
@@ -185,7 +186,7 @@ Game.prototype.drawBoundingBoxes = function() {
 counter = 0;
 
 setInterval(function() {
-  //.log("Ticks in the last second: " + counter);
+  //console.log("Ticks in the last second: " + counter);
   counter = 0;
 }, 1000);
 
@@ -397,16 +398,14 @@ Game.prototype.renderCar = function(car) {
     return;
   }
   var self = this;
-  var img = new Image();
-  img.onload = function() {
+  this.getImage("img/car1.png", function(img) {
     self.context.save();
-    self.context.translate(car.left-self.camera.left, car.top-self.camera.top);
+    self.context.translate(car.left - self.camera.left, car.top - self.camera.top);
     self.context.rotate(car.rotation);
-    self.context.translate(-25/2,-15/2);
-    self.context.drawImage(img,0,0);
+    self.context.translate(-25 / 2, -15 / 2);
+    self.context.drawImage(img, 0, 0);
     self.context.restore();
-  };
-  img.src = "img/car1.png";
+  });
 };
 
 Game.prototype.renderNetworkCars = function() {
@@ -461,13 +460,27 @@ Game.prototype.drawImageCamera = function(url, left, top) {
   this.drawImageRaw(url, left-cameraLeft, top-cameraTop);
 };
 
-Game.prototype.drawImageRaw = function(url, left, top) {
+Game.prototype.getImage = function(url, callback) {
+  var img = this.imageCache[url];
+  if (img) {
+    callback(img);
+    return;
+  }
+
   var self = this;
-  var img = new Image();
+  img = new Image();
   img.onload = function() {
-    self.context.drawImage(img, left, top);
+    self.imageCache[url] = img;
+    callback(img);
   };
   img.src = url;
+};
+
+Game.prototype.drawImageRaw = function(url, left, top) {
+  var self = this;
+  this.getImage(url, function(img) {
+    self.context.drawImage(img, left, top);
+  });
 };
 
 function Network() {
