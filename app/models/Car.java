@@ -6,5 +6,6 @@ public class Car {
 	public Double left;
 	public Double speed;
 	public Double rotation;
-	public String color;
+	public Long hue;
+	public Long lastTick;
 }

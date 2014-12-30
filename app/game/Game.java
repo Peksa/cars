@@ -20,7 +20,6 @@ public class Game implements Runnable {
 	}
 	
 	private Game() {
-		// yolo
 		new Thread(this).start();
 	}
 	
@@ -31,6 +30,10 @@ public class Game implements Runnable {
 	
 	public Car getCar(String id) {
 		return cars.get(id);
+	}
+	
+	public int getNumberOfCars() {
+		return cars.size();
 	}
 	
 	public void removeCar(String id) {
@@ -53,6 +56,11 @@ public class Game implements Runnable {
 		long tick = 0;
 		while (true) {
 			long start = System.currentTimeMillis();
+			
+			for (Car car : cars.values()) {
+				car.lastTick = tick;
+			}
+			
 			Tick t = new Tick(tick, new HashMap<>(cars));
 			pubsub.getStream().publish(t);
 			

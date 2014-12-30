@@ -7,4 +7,5 @@ public class Message {
 	public List<Car> cars;
 	public String type;
 	public Long tick;
+	public Integer numberOfClients;
 }

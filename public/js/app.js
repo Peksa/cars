@@ -12,13 +12,14 @@ Camera.prototype.getCenter = function() {
   return ret;
 };
 
-function Car(top, left, color, id) {
+function Car(top, left, hue, id, lastTick) {
   this.top = top;
   this.left = left;
   this.speed = 0;
   this.rotation = 0;
-  this.color = color;
+  this.hue = hue;
   this.id = id;
+  this.lastTick = lastTick;;
 }
 
 Car.prototype.tick = function() {
@@ -219,9 +220,6 @@ Game.prototype.updatePlayer = function() {
 };
 
 Game.prototype.updateNetworkCars = function() {
-  if (!this.network.cars || this.network.cars.length == 0) {
-    return;
-  }
   for (var i in this.network.cars) {
     var networkCar = this.network.cars[i];
     var car = this.cars[networkCar.id];
@@ -231,6 +229,18 @@ Game.prototype.updateNetworkCars = function() {
     }
     this.updateCar(car, networkCar);
   }
+
+  if (this.network.lastTick && this.network.lastTick.tick % 60 == 0) {
+    // Remove old cars
+    for (var i in this.cars) {
+      var car = this.cars[i];
+      // If car has been missing for 60 ticks, remove it!
+      if (car.lastTick + 60 < this.network.lastTick.tick) {
+        console.log("Car removed");
+        delete this.cars[i];
+      }
+    }
+  }
 };
 
 Game.prototype.updateCar = function(oldCar, newCar) {
@@ -239,7 +249,8 @@ Game.prototype.updateCar = function(oldCar, newCar) {
   oldCar.rotation = newCar.rotation;
   oldCar.speed = newCar.speed;
   oldCar.id = newCar.id;
-  oldCar.color = newCar.color;
+  oldCar.hue = newCar.hue;
+  oldCar.lastTick = newCar.lastTick;
 };
 
 Game.prototype.sendPlayerCar = function() {
@@ -466,7 +477,6 @@ Game.prototype.getImage = function(url, callback) {
     callback(img);
     return;
   }
-
   var self = this;
   img = new Image();
   img.onload = function() {

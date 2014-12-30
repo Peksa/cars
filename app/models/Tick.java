@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 
 public class Tick {
 	public long id;
-	
 	private Map<String, Car> cars;
 	
 	public Tick(long id, Map<String, Car> cars) {
