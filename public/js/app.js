@@ -490,10 +490,11 @@ function Network() {
 }
 
 Network.prototype.connect = function() {
-  var port = (location.port ? ":" + location.port : "");
+  var port = location.port ? ":" + location.port : "";
   var path = location.pathname;
-  path = (path[path.length-1] == "/") ? path : path + "/";
-  var url  = "ws://" + window.location.hostname + port + path + "api/socket";
+  path = path[path.length-1] == "/" ? path : path + "/";
+  var proto = location.protocol == "https:" ? "wss:" : "ws:";
+  var url  = proto + "//" + window.location.hostname + port + path + "api/socket";
   console.log("Connecting to: " + url);
   this.socket = new WebSocket(url);
   this.socket.onmessage = this.messageHandler.bind(this);
