@@ -409,7 +409,8 @@ Game.prototype.renderCar = function(car) {
     return;
   }
   var self = this;
-  this.getImage("car1.png", function(img) {
+  var color = (car.hue % 2) + 1;
+  this.getImage("car" + color + ".png", function(img) {
     self.context.save();
     self.context.translate(car.left - self.camera.left, car.top - self.camera.top);
     self.context.rotate(car.rotation);
