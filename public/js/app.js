@@ -146,6 +146,7 @@ Game.prototype.init = function() {
   this.setupKeyboardListeners();
   this.gameLoop();
   this.network.connect();
+  window.onresize = this.resizeToFullScreen.bind(this);
 };
 
 Game.prototype.setupKeyboardListeners = function() {
@@ -383,8 +384,10 @@ Game.prototype.checkPlayerControls = function() {
 };
 
 Game.prototype.resizeToFullScreen = function() {
-  this.canvas.width = window.innerWidth;
-  this.canvas.height = window.innerHeight;
+  this.canvas.width = Math.min(window.innerWidth, 1600);
+  this.canvas.height = Math.min(window.innerHeight, 1200);
+  this.canvas.style.left = Math.max(0, (window.innerWidth-1600)/2) + "px";
+  this.canvas.style.top = Math.max(0, (window.innerHeight-1200)/2) + "px";
 };
 
 Game.prototype.centerCameraAround = function(left, top) {
