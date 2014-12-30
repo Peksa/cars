@@ -239,8 +239,21 @@ Game.prototype.isCollidingWith = function(boxLeft, boxTop, boxWidth, boxHeight) 
     var x = this.player.left;
     var r = this.player.rotation;
 
-    // TODO: do something smart with radius around car and bounds checking
-    // TODO: before doing "expensive" trigonometry.
+    var optRadius = 15;
+    var optMaxx = x+optRadius;
+    var optMinx = x-optRadius;
+    var optMaxy = y+optRadius;
+    var optMiny = y-optRadius;
+
+    if (boxLeft > optMaxx) {
+      return false;
+    } else if (boxLeft+boxWidth < optMinx) {
+      return false;
+    } else if (boxTop > optMaxy) {
+      return false;
+    } else if (boxTop+boxHeight < optMiny) {
+      return false;
+    }
 
     var ry = y+5*Math.sin(r+Math.PI/2);
     var rx = x+5*Math.cos(r+Math.PI/2);
