@@ -356,17 +356,17 @@ Game.prototype.moveCameraTowards = function(left, top) {
 };
 
 Game.prototype.checkPlayerControls = function() {
-  if (this.pressedKeys[87]) {
+  if (this.pressedKeys[87] || this.pressedKeys[38]) {
     this.player.accelerate()
-  } else if (this.pressedKeys[83]) {
+  } else if (this.pressedKeys[83] || this.pressedKeys[40]) {
     this.player.brakeOrReverse();
   } else {
     this.player.idle();
   }
 
-  if (this.pressedKeys[65] && !this.pressedKeys[68]) {
+  if ((this.pressedKeys[65] && !this.pressedKeys[68]) || (this.pressedKeys[37] && !this.pressedKeys[39])) {
     this.player.turn(-1);
-  } else if (this.pressedKeys[68] && !this.pressedKeys[65]) {
+  } else if ((this.pressedKeys[68] && !this.pressedKeys[65]) || (this.pressedKeys[39] && !this.pressedKeys[37])) {
     this.player.turn(1);
   }
 };
