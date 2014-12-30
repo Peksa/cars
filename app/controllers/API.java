@@ -45,8 +45,8 @@ public class API extends WebSocketController {
         Car car = new Car();
         car.id = id;
         car.hue = hue;
-        car.top = 10d;
-        car.left = 10d;
+        car.top = 100d;
+        car.left = 430d;
         car.rotation = 0d;
         car.speed = 0d;
         
