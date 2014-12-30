@@ -169,7 +169,7 @@ Game.prototype.renderLoop = function() {
     self.renderNetworkCars();
     self.drawTunnels();
 
-    self.drawBoundingBoxes();
+    //self.drawBoundingBoxes();
 
     window.requestAnimationFrame(renderGame);
   }());
