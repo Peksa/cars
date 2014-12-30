@@ -205,7 +205,7 @@ Game.prototype.gameLoop = function() {
     self.tickNetworkCars();
     counter++;
   };
-  setInterval(tickGame, 16);
+  setInterval(tickGame, 15);
 };
 
 Game.prototype.updatePlayer = function() {
