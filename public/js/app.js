@@ -99,9 +99,28 @@ function Game(canvas) {
   this.cars = {};
   this.pressedKeys = {};
   this.network = new Network();
-  this.boundingBoxes = [
-    [91, 88, 31, 161]
+  this.boundingBoxes = [];
+  this.topLeftBoundingBoxes = [
+    [91, 88, 31, 161],
+    [216, 143, 54, 92],
+    [270, 143, 75, 49],
+    [357, 143, 176, 49],
+    [533, 94, 32, 98],
+    [575, 94, 119, 98],
+    [158, 335, 107, 56],
+    [223, 382, 102, 63],
+
   ];
+
+  var w = 1600;
+  var h = 1200;
+  for (var i = 0; i < this.topLeftBoundingBoxes.length; i++) {
+    var box = this.topLeftBoundingBoxes[i];
+    this.boundingBoxes.push([box[0], box[1], box[2], box[3]]);
+    this.boundingBoxes.push([box[0], h-box[3]-box[1], box[2], box[3]]);
+    this.boundingBoxes.push([w-box[2]-box[0], box[1], box[2], box[3]]);
+    this.boundingBoxes.push([w-box[2]-box[0], h-box[3]-box[1], box[2], box[3]]);
+  }
 }
 
 Game.prototype.init = function() {
@@ -144,15 +163,9 @@ Game.prototype.renderLoop = function() {
 };
 
 Game.prototype.drawBoundingBoxes = function() {
-  var w = 1600;
-  var h = 1200;
-
   for (var i = 0; i < this.boundingBoxes.length; i++) {
     var box = this.boundingBoxes[i];
     this.drawRectangleCamera("yellow", box[0], box[1], box[2], box[3]);
-    this.drawRectangleCamera("yellow", box[0], h-box[3]-box[1], box[2], box[3]);
-    this.drawRectangleCamera("yellow", w-box[2]-box[0], box[1], box[2], box[3]);
-    this.drawRectangleCamera("yellow", w-box[2]-box[0], h-box[3]-box[1], box[2], box[3]);
   }
 };
 
