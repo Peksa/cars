@@ -10,6 +10,7 @@ import game.Game;
 import models.Car;
 import models.Message;
 import models.Tick;
+import play.Logger;
 import play.libs.F.Either;
 import play.libs.F.EventStream;
 import play.libs.F.Promise;
@@ -53,7 +54,7 @@ public class API extends WebSocketController {
         game.updateCar(id, car);
         
         if (inbound.isOpen()) {
-        	 System.err.println("Got connect, sending car!");
+        	 Logger.info("Got connect, sending car!");
              outbound.send(gson.toJson(generateCarMessage(car)));
         }
         
@@ -74,13 +75,13 @@ public class API extends WebSocketController {
 	            for (Tick tick : ClassOf(Tick.class).match(e._2)) {
 	            	Message msg = generateTickmessage(id, tick, game.getNumberOfCars());
 	            	if (tick.id % 120 == 0) {
-	            		System.err.println("Sending tick: " + tick.id + ", " + game.getNumberOfCars() + " car(s) connected.");
+	            		Logger.info("Sending tick: %d, %d car(s) connected.", tick.id, game.getNumberOfCars());
 	            	}
 	        		outbound.send(gson.toJson(msg));
 	            }
 	
 	            for (WebSocketClose closed : SocketClosed.match(e._1)) {
-	                System.err.println("Got disconnect.");
+	            	Logger.info("Got disconnect.");
 	                game.removeCar(id);
 	                disconnect();
 	            }
@@ -88,7 +89,7 @@ public class API extends WebSocketController {
         } catch (IllegalStateException e) {
         	// ignore, this simply means someone has been disconnected.
         } finally {
-        	System.err.println("Exception, disconnecting..");
+        	Logger.info("Exception, disconnecting..");
         	game.removeCar(id);
         }
     }
